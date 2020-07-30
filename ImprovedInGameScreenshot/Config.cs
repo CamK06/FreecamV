@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ImprovedInGameScreenshot
+namespace FreecamV
 {
     internal class Config
     {

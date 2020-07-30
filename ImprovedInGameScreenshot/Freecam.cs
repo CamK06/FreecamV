@@ -3,7 +3,7 @@ using GTA;
 using GTA.Math;
 using GTA.Native;
 
-namespace ImprovedInGameScreenshot
+namespace FreecamV
 {
     internal class Freecam
     {

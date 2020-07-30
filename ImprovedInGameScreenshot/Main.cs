@@ -2,11 +2,11 @@
 
 using GTA;
 
-namespace ImprovedInGameScreenshot
+namespace FreecamV
 {
     public class Main : Script
     {
-        internal ScriptSettings Settings = ScriptSettings.Load("scripts\\IngameScreenshot.ini");
+        internal ScriptSettings Settings = ScriptSettings.Load("scripts\\FreecamV.ini");
 
         public Main()
         {
