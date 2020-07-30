@@ -2,6 +2,7 @@
 using GTA;
 using GTA.Math;
 using GTA.Native;
+using GTA.UI;
 
 namespace FreecamV
 {
@@ -180,7 +181,7 @@ namespace FreecamV
 
         public static void Enable()
         {
-            FCamera = World.CreateCamera(Game.Player.Character.Position, Game.Player.Character.Rotation, 50f);
+            FCamera = World.CreateCamera(GameplayCamera.Position, GameplayCamera.Rotation, 50f);
             Function.Call(Hash.DISPLAY_RADAR, false);
             HUD = true;
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
