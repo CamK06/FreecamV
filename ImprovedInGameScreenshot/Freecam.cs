@@ -2,7 +2,6 @@
 using GTA;
 using GTA.Math;
 using GTA.Native;
-using GTA.UI;
 
 namespace FreecamV
 {
