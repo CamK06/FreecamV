@@ -95,8 +95,8 @@ namespace FreecamV
             }
             if (Game.IsControlJustPressed(Control.Detonate))
             {
-                if (!SlowMode) Game.TimeScale /= 5;
-                else Game.TimeScale *= 5;
+                if (!SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
+                else Game.TimeScale *= Config.SlowMotionMultiplier;
                 SlowMode = !SlowMode;
             }
         }
@@ -186,7 +186,7 @@ namespace FreecamV
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
             World.RenderingCamera = FCamera;
-            if(SlowMode) Game.TimeScale /= 5;
+            if(SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
         }
 
         public static void Disable()
@@ -197,7 +197,7 @@ namespace FreecamV
             Function.Call(Hash.CLEAR_FOCUS);
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER, "None");
             World.RenderingCamera = null;
-            if(SlowMode) Game.TimeScale *= 5;
+            if(SlowMode) Game.TimeScale *= Config.SlowMotionMultiplier;
         }
 
         public static void Toggle()

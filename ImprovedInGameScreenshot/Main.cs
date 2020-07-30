@@ -14,6 +14,7 @@ namespace FreecamV
             Config.DefaultSpeed = Settings.GetValue("Settings", "Speed", 4.0f);
             Config.ShiftSpeed = Settings.GetValue("Settings", "BoostSpeed", 20.0f);
             Config.FilterIntensity = Settings.GetValue("Settings", "FilterIntensity", 1.0f);
+            Config.SlowMotionMultiplier = Settings.GetValue("Settings", "SlowMotionMult", 8.5f);
             Config.Precision = Settings.GetValue("Settings", "Precision", 1.0f); // This isnt actually in the ini on default but its still here for if I ever want to add it
 
             // Input handling

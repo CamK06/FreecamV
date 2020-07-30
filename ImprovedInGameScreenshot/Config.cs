@@ -8,6 +8,7 @@ namespace FreecamV
         public static float ShiftSpeed = 20.0f;
         public static float Precision = 1.0f;
         public static float FilterIntensity = 1.0f;
+        public static float SlowMotionMultiplier = 5.5f;
 
         public static List<string> Filters = new List<string>()
         {
