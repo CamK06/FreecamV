@@ -1,5 +1,4 @@
-﻿
-using GTA;
+﻿using GTA;
 using GTA.Math;
 using GTA.Native;
 
@@ -10,8 +9,6 @@ namespace FreecamV
         static Camera FCamera;
         static bool SlowMode = true;
         static bool HUD = true;
-
-        static Vector3 OffsetCoords = Vector3.Zero;
 
         static float OffsetRotX = 0.0f;
         static float OffsetRotY = 0.0f;
@@ -29,6 +26,7 @@ namespace FreecamV
             Function.Call(Hash._DISABLE_FIRST_PERSON_CAM_THIS_FRAME);
             Game.DisableAllControlsThisFrame();
 
+            #region HUD
             if (HUD)
             {
                 // Initialization/Setup
@@ -59,6 +57,7 @@ namespace FreecamV
                 scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
                 Function.Call(Hash.DRAW_SCALEFORM_MOVIE_FULLSCREEN, scaleform.Handle, (int)byte.MaxValue, (int)byte.MaxValue, (int)byte.MaxValue, (int)byte.MaxValue, 0);
             }
+            #endregion
 
             Vector3 CamCoord = FCamera.Position;
             Vector3 NewPos = ProcessNewPos(CamCoord);
@@ -67,6 +66,7 @@ namespace FreecamV
             FCamera.Rotation = new Vector3(OffsetRotX, OffsetRotY, OffsetRotZ);
             Function.Call(Hash._SET_FOCUS_AREA, NewPos.X, NewPos.Y, NewPos.Z, 0.0f, 0.0f, 0.0f);
 
+            #region Misc Controls
             // Misc controls
             if (Game.IsControlJustPressed(Control.VehicleHeadlight))
                 HUD = !HUD;
@@ -99,10 +99,11 @@ namespace FreecamV
                 else Game.TimeScale *= Config.SlowMotionMultiplier;
                 SlowMode = !SlowMode;
             }
+            #endregion
         }
 
 
-
+        #region Movement
         public static Vector3 ProcessNewPos(Vector3 CurrentPos)
         {
             Vector3 Return = CurrentPos;
@@ -134,21 +135,17 @@ namespace FreecamV
                 {
                     float multX = Function.Call<float>(Hash.SIN, OffsetRotZ + 90.0f);
                     float multY = Function.Call<float>(Hash.COS, OffsetRotZ + 90.0f);
-                    float multZ = Function.Call<float>(Hash.SIN, OffsetRotX);
 
                     Return.X -= (float)(0.1 * Speed * multX);
                     Return.Y += (float)(0.1 * Speed * multY);
-                    //Return.Z += (float)(0.1 * Speed * multZ);
                 }
                 if (Game.IsControlPressed(Control.MoveRightOnly)) // Right
                 {
                     float multX = Function.Call<float>(Hash.SIN, OffsetRotZ + 90.0f);
                     float multY = Function.Call<float>(Hash.COS, OffsetRotZ + 90.0f);
-                    float multZ = Function.Call<float>(Hash.SIN, OffsetRotX);
 
                     Return.X += (float)(0.1 * Speed * multX);
                     Return.Y -= (float)(0.1 * Speed * multY);
-                    //Return.Z -= (float)(0.1 * Speed * multZ);
                 }
 
                 // Up/Down
@@ -177,6 +174,7 @@ namespace FreecamV
             
             return Return;
         }
+        #endregion
 
         public static void Enable()
         {
