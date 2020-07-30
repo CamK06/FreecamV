@@ -7,9 +7,13 @@ namespace FreecamV
     internal class Freecam
     {
         static Camera FCamera;
+        static Entity AttachedEntity;
+        static Vector3 OffsetCoords = Vector3.Zero;
+
         static bool SlowMode = true;
         static bool Frozen = false;
         static bool HUD = true;
+        static bool Attached = false;
 
         static float OffsetRotX = 0.0f;
         static float OffsetRotY = 0.0f;
@@ -48,12 +52,12 @@ namespace FreecamV
                 scaleform.CallFunction("SET_DATA_SLOT", 7, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendRight, 0), "");
                 scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
                 scaleform.CallFunction("SET_DATA_SLOT", 9, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Reload, 0), $"Reset Filter");
-
                 scaleform.CallFunction("SET_DATA_SLOT", 10, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Detonate, 0), "Slow Motion");
                 scaleform.CallFunction("SET_DATA_SLOT", 11, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.VehicleExit, 0), "Freeze");
-
+                if (!Attached) scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorAccept, 0), "Attach");
+                else scaleform.CallFunction("SET_DATA_SLOT", 13, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorCancel, 0), "Detach");
                 // HUD Toggle
-                scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, 74, 0), "Toggle HUD");
+                scaleform.CallFunction("SET_DATA_SLOT", 14, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, 74, 0), "Toggle HUD");
 
                 // Drawing
                 scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
@@ -70,6 +74,25 @@ namespace FreecamV
 
             #region Misc Controls
             // Misc controls
+            if (Attached && Game.IsControlJustPressed(Control.CursorCancel))
+            {
+                // Attachment cleanup
+                FCamera.Detach();
+                AttachedEntity = null;
+                Attached = false;
+            }
+            else if (Game.IsControlJustPressed(Control.CursorAccept))
+            {
+                Entity AttachEnt = GetEntityInFrontOfCam(FCamera);
+                if (AttachEnt != null)
+                {
+                    AttachedEntity = AttachEnt;
+                    OffsetCoords = Function.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS, AttachedEntity, FCamera.Position.X, FCamera.Position.Y, FCamera.Position.Z);
+                    FCamera.AttachTo(AttachedEntity, new Vector3(OffsetCoords.X, OffsetCoords.Y, OffsetCoords.Z));
+                    Attached = true;
+                }
+            }
+
             if (Game.IsControlJustPressed(Control.VehicleHeadlight))
                 HUD = !HUD;
             if (Game.IsControlPressed(Control.FrontendUp))
@@ -210,6 +233,7 @@ namespace FreecamV
             World.RenderingCamera = null;
             Game.Pause(false);
             Frozen = false;
+            Attached = false;
             if(SlowMode) Game.TimeScale *= Config.SlowMotionMultiplier;
         }
 
@@ -219,6 +243,23 @@ namespace FreecamV
                 Enable();
             else
                 Disable();
+        }
+
+        public static Entity GetEntityInFrontOfCam(Camera Cam)
+        {
+            Vector3 CamCoords = Function.Call<Vector3>(Hash.GET_CAM_COORD, Cam);
+            Vector3 Offset = new Vector3()
+            {
+                // Honestly I have no fucking idea what any of this does. I'm just copying it 
+                X = CamCoords.X - Function.Call<float>(Hash.SIN, OffsetRotZ) * 100.0f,
+                Y = CamCoords.Y + Function.Call<float>(Hash.COS, OffsetRotZ) * 100.0f,
+                Z = CamCoords.Z + Function.Call<float>(Hash.SIN, OffsetRotX) * 100.0f
+            };
+
+            //int RayHandle = StartShapeTestRay(CamCoords.X, CamCoords.Y, CamCoords.Z, Offset.X, Offset.Y, Offset.Z, 10, 0, 0);
+            var Cast = World.Raycast(CamCoords, Offset, IntersectFlags.Everything);
+            if (Cast.DidHit) return Cast.HitEntity;
+            else return null;
         }
     }
 }
