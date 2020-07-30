@@ -6,8 +6,6 @@ namespace FreecamV
 {
     public class Main : Script
     {
-        internal ScriptSettings Settings = ScriptSettings.Load("scripts\\FreecamV.ini");
-
         public Main()
         {
             // Load all of the config values from ini
