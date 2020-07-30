@@ -7,8 +7,8 @@
     <ProjectGuid>{7132C0FE-2750-4CF7-9CA5-F3AE6C751BA2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ImprovedInGameScreenshot</RootNamespace>
-    <AssemblyName>ImprovedInGameScreenshot</AssemblyName>
+    <RootNamespace>FreecamV</RootNamespace>
+    <AssemblyName>FreecamV</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
