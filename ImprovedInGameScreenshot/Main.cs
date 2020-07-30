@@ -21,7 +21,6 @@ namespace FreecamV
                 if (e.KeyCode == Settings.GetValue("Keys", "Toggle", Keys.J))
                     Freecam.Toggle();
             };
-
             // Ticking for freecam
             Tick += (sender, e) =>
             {

@@ -8,6 +8,7 @@ namespace FreecamV
     {
         static Camera FCamera;
         static bool SlowMode = true;
+        static bool Frozen = false;
         static bool HUD = true;
 
         static float OffsetRotX = 0.0f;
@@ -49,9 +50,10 @@ namespace FreecamV
                 scaleform.CallFunction("SET_DATA_SLOT", 9, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Reload, 0), $"Reset Filter");
 
                 scaleform.CallFunction("SET_DATA_SLOT", 10, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Detonate, 0), "Slow Motion");
+                scaleform.CallFunction("SET_DATA_SLOT", 11, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.VehicleExit, 0), "Freeze");
 
                 // HUD Toggle
-                scaleform.CallFunction("SET_DATA_SLOT", 11, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, 74, 0), "Toggle HUD");
+                scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, 74, 0), "Toggle HUD");
 
                 // Drawing
                 scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
@@ -98,6 +100,16 @@ namespace FreecamV
                 if (!SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
                 else Game.TimeScale *= Config.SlowMotionMultiplier;
                 SlowMode = !SlowMode;
+            }
+            if (Game.IsControlJustPressed(Control.VehicleExit))
+            {
+                if (SlowMode)
+                {
+                    SlowMode = false;
+                    Game.TimeScale *= Config.SlowMotionMultiplier;
+                }
+                Frozen = !Frozen;
+                Game.Pause(Frozen);
             }
             #endregion
         }
@@ -178,7 +190,8 @@ namespace FreecamV
 
         public static void Enable()
         {
-            FCamera = World.CreateCamera(GameplayCamera.Position, GameplayCamera.Rotation, 50f);
+            FCamera = World.CreateCamera(GameplayCamera.Position, GameplayCamera.Rotation, GameplayCamera.FieldOfView);
+            FCamera.Direction = GameplayCamera.Direction;
             Function.Call(Hash.DISPLAY_RADAR, false);
             HUD = true;
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
@@ -195,6 +208,8 @@ namespace FreecamV
             Function.Call(Hash.CLEAR_FOCUS);
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER, "None");
             World.RenderingCamera = null;
+            Game.Pause(false);
+            Frozen = false;
             if(SlowMode) Game.TimeScale *= Config.SlowMotionMultiplier;
         }
 
