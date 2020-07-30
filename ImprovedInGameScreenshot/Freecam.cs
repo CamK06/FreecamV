@@ -8,7 +8,7 @@ namespace FreecamV
     internal class Freecam
     {
         static Camera FCamera;
-        static bool SlowMode = false;
+        static bool SlowMode = true;
         static bool HUD = true;
 
         static Vector3 OffsetCoords = Vector3.Zero;
