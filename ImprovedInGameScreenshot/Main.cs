@@ -15,6 +15,8 @@ namespace FreecamV
             Config.SlowMotionMultiplier = Settings.GetValue("Settings", "SlowMotionMult", 8.5f);
             Config.Precision = Settings.GetValue("Settings", "Precision", 1.0f); // This isnt actually in the ini on default but its still here for if I ever want to add it
 
+            Freecam.Initialize();
+
             // Input handling
             KeyDown += (sender, e) =>
             {
