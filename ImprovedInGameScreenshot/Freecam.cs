@@ -32,14 +32,11 @@ namespace FreecamV
             Function.Call(Hash._DISABLE_FIRST_PERSON_CAM_THIS_FRAME);
             Game.DisableAllControlsThisFrame();
 
-            #region HUD
             if (HUD)
             {
-                // Drawing
                 scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
-                Function.Call(Hash.DRAW_SCALEFORM_MOVIE_FULLSCREEN, scaleform.Handle, (int)byte.MaxValue, (int)byte.MaxValue, (int)byte.MaxValue, (int)byte.MaxValue, 0);
+                scaleform.Render2D();
             }
-            #endregion
 
             Vector3 CamCoord = FCamera.Position;
             Vector3 NewPos = ProcessNewPos(CamCoord);
@@ -57,6 +54,7 @@ namespace FreecamV
                 AttachedEntity = null;
                 Attached = false;
                 scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorAccept, 0), "Attach");
+                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
             }
             else if (Game.IsControlJustPressed(Control.CursorAccept))
             {
@@ -68,6 +66,7 @@ namespace FreecamV
                     FCamera.AttachTo(AttachedEntity, new Vector3(OffsetCoords.X, OffsetCoords.Y, OffsetCoords.Z));
                     Attached = true;
                     scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorCancel, 0), "Detach");
+                    scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
                 }
             }
 
@@ -84,6 +83,7 @@ namespace FreecamV
                 Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
                 Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
                 scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
+                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
             }
             else if (Game.IsControlJustPressed(Control.FrontendRight))
             {
@@ -92,12 +92,14 @@ namespace FreecamV
                 Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
                 Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
                 scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
+                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
             }
             else if (Game.IsControlJustPressed(Control.Reload))
             {
                 FilterIndex = 0;
                 Function.Call(Hash.SET_TIMECYCLE_MODIFIER, "None");
                 scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
+                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
             }
             if (Game.IsControlJustPressed(Control.Detonate))
             {
@@ -201,6 +203,7 @@ namespace FreecamV
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
             World.RenderingCamera = FCamera;
+            Initialize();
             if(SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
         }
 
