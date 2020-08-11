@@ -1,6 +1,12 @@
 ﻿using GTA;
 using GTA.Math;
 using GTA.Native;
+using GTA.UI;
+using System;
+
+/* NOTE
+ * I use the sin and cos natives because Math.Sin and Math.Cos produced strange results. Probably just because I'm a fuckin' idiot and doing everything wrong but still.
+ */
 
 namespace FreecamV
 {
@@ -40,6 +46,9 @@ namespace FreecamV
 
             Vector3 CamCoord = FCamera.Position;
             Vector3 NewPos = ProcessNewPos(CamCoord);
+
+            if(!Function.Call<bool>(Hash.IS_RADAR_HIDDEN))
+                Function.Call(Hash.DISPLAY_RADAR, false);
 
             FCamera.Position = NewPos;
             FCamera.Rotation = new Vector3(OffsetRotX, OffsetRotY, OffsetRotZ);
