@@ -1,11 +1,9 @@
-﻿using GTA;
+using GTA;
 using GTA.Math;
 using GTA.Native;
-using GTA.UI;
-using System;
 
 /* NOTE
- * I use the sin and cos natives because Math.Sin and Math.Cos produced strange results. Probably just because I'm a fuckin' idiot and doing everything wrong but still.
+ * I use the sin and cos natives because Math.Sin and Math.Cos produced strange results. Probably just because I'm a fuckin' idiot and doing everything wrong... but still; that's just how it is
  */
 
 namespace FreecamV
@@ -113,7 +111,7 @@ namespace FreecamV
             if (Game.IsControlJustPressed(Control.Detonate))
             {
                 if (!SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
-                else Game.TimeScale *= Config.SlowMotionMultiplier;
+                else Game.TimeScale = 1;
                 SlowMode = !SlowMode;
             }
             if (Game.IsControlJustPressed(Control.VehicleExit))
@@ -121,7 +119,7 @@ namespace FreecamV
                 if (SlowMode)
                 {
                     SlowMode = false;
-                    Game.TimeScale *= Config.SlowMotionMultiplier;
+                    //Game.TimeScale *= Config.SlowMotionMultiplier;
                 }
                 Frozen = !Frozen;
                 Game.Pause(Frozen);
@@ -212,7 +210,7 @@ namespace FreecamV
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
             World.RenderingCamera = FCamera;
-            Initialize();
+            Init();
             if(SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
         }
 
@@ -227,10 +225,10 @@ namespace FreecamV
             Game.Pause(false);
             Frozen = false;
             Attached = false;
-            if(SlowMode) Game.TimeScale *= Config.SlowMotionMultiplier;
+            if(SlowMode) Game.TimeScale = 1;
         }
 
-        public static void Initialize()
+        public static void Init()
         {
             scaleform = new Scaleform("instructional_buttons");
             scaleform.CallFunction("CLEAR_ALL", new object[0]);
