@@ -17,6 +17,7 @@ namespace FreecamV
 
         static bool SlowMode = true;
         static bool Frozen = false;
+        static bool Lock = false;
         static bool HUD = true;
         static bool Attached = false;
 
@@ -34,7 +35,8 @@ namespace FreecamV
                 return;
 
             Function.Call(Hash._DISABLE_FIRST_PERSON_CAM_THIS_FRAME);
-            Game.DisableAllControlsThisFrame();
+            if (!Lock)
+                Game.DisableAllControlsThisFrame();
 
             if (HUD)
             {
@@ -45,7 +47,7 @@ namespace FreecamV
             Vector3 CamCoord = FCamera.Position;
             Vector3 NewPos = ProcessNewPos(CamCoord);
 
-            if(!Function.Call<bool>(Hash.IS_RADAR_HIDDEN))
+            if (!Function.Call<bool>(Hash.IS_RADAR_HIDDEN))
                 Function.Call(Hash.DISPLAY_RADAR, false);
 
             FCamera.Position = NewPos;
@@ -53,76 +55,87 @@ namespace FreecamV
             Function.Call(Hash._SET_FOCUS_AREA, NewPos.X, NewPos.Y, NewPos.Z, 0.0f, 0.0f, 0.0f);
 
             #region Misc Controls
-            // Misc controls
-            if (Attached && Game.IsControlJustPressed(Control.CursorCancel))
+            if (!Lock)
             {
-                // Attachment cleanup
-                FCamera.Detach();
-                AttachedEntity = null;
-                Attached = false;
-                scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorAccept, 0), "Attach");
-                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
-            }
-            else if (Game.IsControlJustPressed(Control.CursorAccept))
-            {
-                Entity AttachEnt = GetEntityInFrontOfCam(FCamera);
-                if (AttachEnt != null)
+                // Misc controls
+                if (Attached && Game.IsControlJustPressed(Control.CursorCancel))
                 {
-                    AttachedEntity = AttachEnt;
-                    OffsetCoords = Function.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS, AttachedEntity, FCamera.Position.X, FCamera.Position.Y, FCamera.Position.Z);
-                    FCamera.AttachTo(AttachedEntity, new Vector3(OffsetCoords.X, OffsetCoords.Y, OffsetCoords.Z));
-                    Attached = true;
-                    scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorCancel, 0), "Detach");
+                    // Attachment cleanup
+                    FCamera.Detach();
+                    AttachedEntity = null;
+                    Attached = false;
+                    scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorAccept, 0), "Attach");
                     scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
                 }
-            }
-
-            if (Game.IsControlJustPressed(Control.VehicleHeadlight))
-                HUD = !HUD;
-            if (Game.IsControlPressed(Control.FrontendUp))
-                FCamera.FieldOfView -= 1;
-            else if (Game.IsControlPressed(Control.FrontendDown))
-                FCamera.FieldOfView += 1;
-            if (Game.IsControlJustPressed(Control.FrontendLeft))
-            {
-                if (FilterIndex == 0) FilterIndex = Config.Filters.Count - 1;
-                else FilterIndex--;
-                Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
-                Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
-                scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
-                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
-            }
-            else if (Game.IsControlJustPressed(Control.FrontendRight))
-            {
-                if (FilterIndex == Config.Filters.Count - 1) FilterIndex = 0;
-                else FilterIndex++;
-                Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
-                Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
-                scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
-                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
-            }
-            else if (Game.IsControlJustPressed(Control.Reload))
-            {
-                FilterIndex = 0;
-                Function.Call(Hash.SET_TIMECYCLE_MODIFIER, "None");
-                scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
-                scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
-            }
-            if (Game.IsControlJustPressed(Control.Detonate))
-            {
-                if (!SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
-                else Game.TimeScale = 1;
-                SlowMode = !SlowMode;
-            }
-            if (Game.IsControlJustPressed(Control.VehicleExit))
-            {
-                if (SlowMode)
+                else if (Game.IsControlJustPressed(Control.CursorAccept))
                 {
-                    SlowMode = false;
-                    //Game.TimeScale *= Config.SlowMotionMultiplier;
+                    Entity AttachEnt = GetEntityInFrontOfCam(FCamera);
+                    if (AttachEnt != null)
+                    {
+                        AttachedEntity = AttachEnt;
+                        OffsetCoords = Function.Call<Vector3>(Hash.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS, AttachedEntity, FCamera.Position.X, FCamera.Position.Y, FCamera.Position.Z);
+                        FCamera.AttachTo(AttachedEntity, new Vector3(OffsetCoords.X, OffsetCoords.Y, OffsetCoords.Z));
+                        Attached = true;
+                        scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorCancel, 0), "Detach");
+                        scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+                    }
                 }
-                Frozen = !Frozen;
-                Game.Pause(Frozen);
+
+                if (Game.IsControlJustPressed(Control.VehicleHeadlight))
+                    HUD = !HUD;
+                if (Game.IsControlPressed(Control.FrontendUp))
+                    FCamera.FieldOfView -= 1;
+                else if (Game.IsControlPressed(Control.FrontendDown))
+                    FCamera.FieldOfView += 1;
+                if (Game.IsControlJustPressed(Control.FrontendLeft))
+                {
+                    if (FilterIndex == 0) FilterIndex = Config.Filters.Count - 1;
+                    else FilterIndex--;
+                    Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
+                    Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
+                    scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
+                    scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+                }
+                else if (Game.IsControlJustPressed(Control.FrontendRight))
+                {
+                    if (FilterIndex == Config.Filters.Count - 1) FilterIndex = 0;
+                    else FilterIndex++;
+                    Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
+                    Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Config.FilterIntensity);
+                    scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
+                    scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+                }
+                else if (Game.IsControlJustPressed(Control.Reload))
+                {
+                    FilterIndex = 0;
+                    Function.Call(Hash.SET_TIMECYCLE_MODIFIER, "None");
+                    scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
+                    scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+                }
+                if (Game.IsControlJustPressed(Control.Detonate))
+                {
+                    if (!SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
+                    else Game.TimeScale = 1;
+                    SlowMode = !SlowMode;
+                }
+                if (Game.IsControlJustPressed(Control.VehicleExit))
+                {
+                    SlowMode = !SlowMode;
+                    Frozen = !Frozen;
+                    Game.Pause(Frozen);
+                }
+            }
+            if (Game.IsControlJustPressed(Control.FrontendAccept))
+            {
+                Lock = !Lock;
+
+                if (Lock)
+                {
+                    Game.Pause(false);
+                    HUD = false;
+                }
+                else
+                    HUD = true;
             }
             #endregion
         }
@@ -133,7 +146,7 @@ namespace FreecamV
         {
             Vector3 Return = CurrentPos;
 
-            if (Function.Call<bool>(Hash._IS_INPUT_DISABLED, 0))
+            if (Function.Call<bool>(Hash._IS_INPUT_DISABLED, 0) && !Lock)
             {
                 // Basic movement--- WASD
                 if (Game.IsControlPressed(Control.MoveUpOnly)) // Forwards
@@ -156,7 +169,7 @@ namespace FreecamV
                     Return.Y -= (float)(0.1 * Speed * multY);
                     Return.Z -= (float)(0.1 * Speed * multZ);
                 }
-                if(Game.IsControlPressed(Control.MoveLeftOnly)) // Left
+                if (Game.IsControlPressed(Control.MoveLeftOnly)) // Left
                 {
                     float multX = Function.Call<float>(Hash.SIN, OffsetRotZ + 90.0f);
                     float multY = Function.Call<float>(Hash.COS, OffsetRotZ + 90.0f);
@@ -196,7 +209,7 @@ namespace FreecamV
 
             if (OffsetRotX > 90.0) OffsetRotX = 90.0f;
             else if (OffsetRotX < -90.0f) OffsetRotX = -90.0f;
-            
+
             return Return;
         }
         #endregion
@@ -211,7 +224,7 @@ namespace FreecamV
             Function.Call(Hash.SET_TIMECYCLE_MODIFIER, Config.Filters[FilterIndex]);
             World.RenderingCamera = FCamera;
             Init();
-            if(SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
+            if (SlowMode) Game.TimeScale /= Config.SlowMotionMultiplier;
         }
 
         public static void Disable()
@@ -225,7 +238,8 @@ namespace FreecamV
             Game.Pause(false);
             Frozen = false;
             Attached = false;
-            if(SlowMode) Game.TimeScale = 1;
+            Lock = false;
+            if (SlowMode) Game.TimeScale = 1;
         }
 
         public static void Init()
@@ -249,6 +263,7 @@ namespace FreecamV
             scaleform.CallFunction("SET_DATA_SLOT", 9, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Reload, 0), $"Reset Filter");
             scaleform.CallFunction("SET_DATA_SLOT", 10, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Detonate, 0), "Slow Motion");
             scaleform.CallFunction("SET_DATA_SLOT", 11, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.VehicleExit, 0), "Freeze");
+            scaleform.CallFunction("SET_DATA_SLOT", 11, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendAccept, 0), "Control Lock");
             if (!Attached) scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorAccept, 0), "Attach");
             else scaleform.CallFunction("SET_DATA_SLOT", 12, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.CursorCancel, 0), "Detach");
             // HUD Toggle
