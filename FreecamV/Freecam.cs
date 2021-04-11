@@ -107,6 +107,8 @@ namespace FreecamV
                 }
                 else if (Game.IsControlJustPressed(Control.Reload))
                 {
+                    Disable();
+                    Enable();
                     FilterIndex = 0;
                     Function.Call(Hash.SET_TIMECYCLE_MODIFIER, "None");
                     scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
@@ -239,6 +241,9 @@ namespace FreecamV
             Frozen = false;
             Attached = false;
             Lock = false;
+            OffsetRotX = 0.0f;
+            OffsetRotY = 0.0f;
+            OffsetRotZ = 0.0f;
             if (SlowMode) Game.TimeScale = 1;
         }
 
@@ -260,7 +265,7 @@ namespace FreecamV
             scaleform.CallFunction("SET_DATA_SLOT", 6, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendUp, 0), "FOV");
             scaleform.CallFunction("SET_DATA_SLOT", 7, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendRight, 0), "");
             scaleform.CallFunction("SET_DATA_SLOT", 8, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendLeft, 0), $"Filter: [{Config.Filters[FilterIndex]}]");
-            scaleform.CallFunction("SET_DATA_SLOT", 9, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Reload, 0), $"Reset Filter");
+            scaleform.CallFunction("SET_DATA_SLOT", 9, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Reload, 0), $"Reset");
             scaleform.CallFunction("SET_DATA_SLOT", 10, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.Detonate, 0), "Slow Motion");
             scaleform.CallFunction("SET_DATA_SLOT", 11, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.VehicleExit, 0), "Freeze");
             scaleform.CallFunction("SET_DATA_SLOT", 11, Function.Call<string>(Hash.GET_CONTROL_INSTRUCTIONAL_BUTTON, 2, Control.FrontendAccept, 0), "Control Lock");
